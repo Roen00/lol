@@ -1,0 +1,10 @@
+Napisz program laczacy sie ze strona podana jako argument 
+wywolania programu i wypisujacy 
+wszystkie znalezione na niej linki i adresy email 
+wykorzystujac w tym celu wyrazenia regularne 
+(pakiet java.util.regex). 
+
+Oprocz tego program ma zapisac 
+do pliku wszystkie parametry polaczenia, 
+adres IP komputera na ktorym znajduje 
+sie strona oraz naglowek strony (zawartosc sekcji <head>).
