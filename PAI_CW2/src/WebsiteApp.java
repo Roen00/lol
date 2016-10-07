@@ -15,7 +15,6 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.apache.commons.lang3.StringUtils;
 
-
 public class WebsiteApp {
 
 	public static void main(String[] args) {
@@ -36,29 +35,25 @@ public class WebsiteApp {
 		    URLConnection myURLConnection = myURL.openConnection();
 		    myURLConnection.connect();
 	        BufferedReader in = new BufferedReader(new InputStreamReader(myURL.openStream()));
-
+	        
 	        String inputLine;
 	        while ((inputLine = in.readLine()) != null){
-	        	findSitesAndEmails(inputLine);
+	        	findWebSitesAndEmails(inputLine);
 	        }
 	      
 	        findAndSaveToFile(myURL);
 
 	        in.close();
 		} 
-		catch (MalformedURLException e) { 
-		    // new URL() failed
-		    // ...
+		catch (MalformedURLException e) {
 			System.out.println("Problem z polaczeniem: " + e);
 		} 
 		catch (IOException e) {   
-		    // openConnection() failed
-		    // ...
 			System.out.println("Problem z polaczeniem: " + e);
 		}
 	}
 	
-	private static void findSitesAndEmails(String text){
+	private static void findWebSitesAndEmails(String text){
 		String emailPattern1 = ("^[A-Z0-9._%+-]+@[A-Z0-9.-]+\\.[A-Z]{2,6}$");
 		String emailPattern2 = ("(@)?(href=')?(HREF=')?(HREF=\")?(href=\")?(mailto:)?[a-zA-Z_0-9\\-]+(\\.\\w[a-zA-Z_0-9\\-]+)+(/[#&\\n\\-=?\\+\\%/\\.\\w]+)\"?");
 		String httpPattern = ("(@)?(href=')?(HREF=')?(HREF=\")?(href=\")?(http://)?+(\\.\\w[a-zA-Z_0-9\\-]+)+(/[#&\\n\\-=?\\+\\%/\\.\\w]+)\"?");
@@ -78,35 +73,38 @@ public class WebsiteApp {
 	}
 	
 	private static void findAndSaveToFile(URL myURL) throws IOException{
+		PrintWriter writer = new PrintWriter("information.txt", "UTF-8");
 		URLConnection myURLConnection = myURL.openConnection();
 	    myURLConnection.connect();
 	    
-	    PrintWriter writer = new PrintWriter("information.txt", "UTF-8");
-	    
-	    /*Getting content of <head>*/
+	    /*Getting and writing content of <head>*/
 	    Map<String, List<String>> map = myURLConnection.getHeaderFields();
 
 		for (Map.Entry<String, List<String>> entry : map.entrySet()) {
-			//System.out.println("Key : " + entry.getKey() + " , Value : " + entry.getValue());
 			writer.println("Key : " + entry.getKey() + " , Value : " + entry.getValue());
 		}
 		
-		/*Getting IP address*/
+		/*Getting and writing IP address*/
 		InetAddress address = InetAddress.getByName(myURL.getHost());
 		String ip = address.getHostAddress();
-		//System.out.println("Adres ip servera: " + ip);
 		writer.println("Adres ip servera: " + ip);
 	    
-		/*Getting parameters of connection*/
-		String[] key = {"Protocol", "Authority", "Host", "Port", "Path", "Query", "Filename", "Ref"};
-		String[] value = {myURL.getProtocol(), myURL.getAuthority(), myURL.getHost(), Integer.toString(myURL.getPort()), myURL.getPath(), myURL.getQuery(), myURL.getFile(), myURL.getRef()};
+		/*Getting and writing parameters of connection*/
+		String[] key = {"Protocol", "Authority",
+						"Host", "Port", 
+						"Path", "Query",
+						"Filename", "Ref"};
+		String[] value = {myURL.getProtocol(), myURL.getAuthority(), 
+						  myURL.getHost(), Integer.toString(myURL.getPort()),
+						  myURL.getPath(), myURL.getQuery(),
+						  myURL.getFile(), myURL.getRef()};
+		
 		HashMap<String, String> params = new HashMap<String, String>();
 		
 		for (int i = 0; i < key.length; i++){
 			params.put(key[i], value[i]);
 		}
-		
-		//System.out.println(Arrays.asList(params));
+	
 		writer.print(Arrays.asList(params));
 		writer.close();
 		
