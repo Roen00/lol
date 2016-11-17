@@ -68,6 +68,51 @@ public class Client{
 		}
 		
 		
+		
+		//Service name
+		while(true){
+			String line = clientInputStream.readLine();
+			System.out.println(line);
+			if (line.toLowerCase().startsWith("nazwa")){
+				System.out.println("Podaj nazwe uslugi ");
+				String serviceName = stdIn.readLine();
+				System.out.println("Client: " + serviceName);
+				clientOutputStream.println(serviceName);
+			}
+			else if (line.toLowerCase().startsWith("error")){
+				System.out.println("Blad, jeszcze raz");
+			}
+			else if (line.toLowerCase().startsWith("accepted")){
+				System.out.println("Zaakceptowano nazwe uslugi");
+				break;
+			}
+		}
+		
+		//Service term
+		while(true){
+			String line = clientInputStream.readLine();
+			System.out.println(line);
+			if (line.toLowerCase().startsWith("termin")){
+				System.out.println("Podaj termin uslugi ");
+				String serviceTerm = stdIn.readLine();
+				System.out.println("Client: " + serviceTerm);
+				clientOutputStream.println(serviceTerm);
+			}
+			else if (line.toLowerCase().startsWith("error")){
+				System.out.println("Blad, jeszcze raz");
+			}
+			else if (line.toLowerCase().startsWith("accepted")){
+				System.out.println("Zaakceptowano termin uslugi");
+				break;
+			}
+		}
+		
+		while(true){
+			if(clientInputStream.readLine() != null){
+				break;
+			}
+		}
+		
 //		while ((userInput = stdIn.readLine()) != null) {
 //			out.println(userInput);
 //			System.out.println("Server: " + in.readLine());

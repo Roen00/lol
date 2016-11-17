@@ -37,6 +37,30 @@ public class Service {
 		this.statusOfService = ServiceConstants.NO_INFO;
 	}
 	
+	public Service(String nameOfService, String termOfService){
+		this.nameOfService = nameOfService;
+		this.termOfService = termOfService;
+		this.statusOfService = ServiceConstants.NEW_SERVICE;
+	}
+	
+	public String print(){
+		if(statusOfService == 0){
+			return ("Service name: " + this.nameOfService + ", service term: " + this.termOfService + ", service status: no info.");
+		}
+		else if(statusOfService == 1){
+			return ("Service name: " + this.nameOfService + ", service term: " + this.termOfService + ", service status: new service");
+		}
+		else if(statusOfService == 2){
+			return ("Service name: " + this.nameOfService + ", service term: " + this.termOfService + ", service status: reserved.");	
+		}
+		else if(statusOfService == 3){
+			return ("Service name: " + this.nameOfService + ", service term: " + this.termOfService + ", service status: withdrawn.");	
+		}
+		else {
+			return ("Service name: " + this.nameOfService + ", service term: " + this.termOfService + ", service status: !!!PROBLEM!!!");	
+		}
+	}
+	
 	
 	
 }

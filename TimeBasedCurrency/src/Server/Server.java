@@ -6,16 +6,18 @@ import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
-import java.util.LinkedList;
-import java.util.List;
 import java.util.Map;
  
 public class Server {
 	private final int port = 3000;
 	//private int numberOfClientsConnected = 0;
+	private PrintWriter serverOutputStream;
+	private BufferedReader serverInputStream;
 	
-	private Map<String, List<Service>> data = new LinkedHashMap<String, List<Service>>();
+	private Map<String, HashSet<Service>> data = new LinkedHashMap<String, HashSet<Service>>();
+	private HashSet<Service> serviceSet = new HashSet<Service>();
 	
 	public static void main(String[] args) throws Exception {
 		Server server = new Server();
@@ -41,10 +43,8 @@ public class Server {
 	
 	private class Connection extends Thread {
 		private Socket socket;
-		private PrintWriter serverOutputStream;
-		private BufferedReader serverInputStream;
 		private int decision;
-		private String nameOfClient;
+		private String actualClient;
 		
 		public Connection(Socket socket) {
 			this.socket = socket;
@@ -52,16 +52,15 @@ public class Server {
 		
 		public void run() {
 			try {
-				System.out.println("Klient polaczyl sie z serverem.");
-				
+				System.out.println("Nowy klient polaczyl sie z serwerem.");
 				serverOutputStream = new PrintWriter(socket.getOutputStream(), true);
 				serverInputStream = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-				//String inputLine;
-				
-				
+
 				//Getting name from user
 				while(true){
-					if(getNameFromClient(serverOutputStream, serverInputStream, nameOfClient)){
+					String name;
+					if((name = getNameFromClient()) != null){
+						setActualClientName(name);
 						break;
 					}
 				}
@@ -74,38 +73,40 @@ public class Server {
 					}
 				}
 				
-				
+				//Get decision and processs it
 				while(true){
 					decision = Integer.parseInt(serverInputStream.readLine());
 					
 					if(decision == ServerConstants.CLOSE){
 						System.out.println("Client wybral zamkniecie polaczenia");
-						//out.println("Zamykam polaczenie!");
-						return;
+						break;
 					}
 					else if (decision == ServerConstants.SUBMIT_NEW_SERVICE){
-						System.out.println("Client wybral zgloszneie uslugi");
-						break;
+						System.out.println("Client wybral zglosznie uslugi");
+						Service service = getService();
+						serviceSet.add(service);
+						data.put(actualClient, serviceSet);
+						
+						for (Map.Entry<String, HashSet<Service>> entry : data.entrySet()) {
+						    System.out.println(entry.getKey() + " : ");
+						    HashSet<Service> temp = entry.getValue();
+						    for (Service s : temp) {
+						        System.out.print(s.print());
+						    }
+						}
+						//zapytaj o nazwe uslugi i termin
+						//sprawdz czy usluga istnieje
 					}
 					else if (decision == ServerConstants.WITHDRAW_YOUR_SERVICE){
 						System.out.println("Client wybral zamkniecie uslugi");
-						break;
 					}
 					else if (decision == ServerConstants.SHOW_ALL_SERVICES){
 						System.out.println("Client wybral wyswietlenie wszystkich uslug");
-						break;
 					}
 					else if (decision == ServerConstants.RESERVE_SERVICE){
 						System.out.println("Client wybral rezerwacje uslugi");
-						break;
 					}
-					
-					System.out.println("Przyjalem decyzje i robie cos");
-					
 				}
-				
-				
-				
 				
 				socket.close();
 			}
@@ -113,7 +114,12 @@ public class Server {
 				System.out.println(e.getMessage());
 			}
 		}
-}
+		
+		private void setActualClientName(String name){
+			this.actualClient = name;
+		}
+		
+	}
 	
 	private void showOptions(PrintWriter serverOutputStream){
 		serverOutputStream.println(	"Co chcesz zrobic? \n" +
@@ -124,22 +130,55 @@ public class Server {
 					"4. Zarezerwuj us³ugê. \n");
 	}
 	
-	private boolean getNameFromClient(PrintWriter serverOutputStream, BufferedReader serverInputStream, String nameOfClient) throws IOException{
+	private String getNameFromClient() throws IOException{
 		serverOutputStream.println("Podaj nazwe uzytkownika");
-		nameOfClient = serverInputStream.readLine();
+		String nameOfClient = serverInputStream.readLine();
 		if (nameOfClient == null){
-			return false;
+			return null;
 		}
 		synchronized(data){
 			if (!data.containsKey(nameOfClient)){
-				data.put(nameOfClient, new LinkedList<>());
+				data.put(nameOfClient, new HashSet<>());
 				serverOutputStream.println("accepted");
-				return true;
+				return nameOfClient;
 			}
 			else {
 				serverOutputStream.println("error.");
 			}
 		}
-		return false;
+		return null;
 	}
+	
+	private Service getService() throws IOException{
+		serverOutputStream.println("nazwa");
+		String nameOfService = serverInputStream.readLine();
+		if (nameOfService == null){
+			return null;
+		}
+		synchronized(serviceSet){
+			if (!serviceSet.contains(nameOfService)){
+				System.out.println("Server: " + nameOfService);
+				serverOutputStream.println("accepted");
+				String termOfService = getTermOfService();
+				serverOutputStream.println("accepted");
+				return new Service(nameOfService, termOfService);
+			}
+			else {
+				serverOutputStream.println("error.");
+				return null;
+			}
+		}
+	}
+	
+	private String getTermOfService() throws IOException{
+		serverOutputStream.println("termin");
+		String termOfService = serverInputStream.readLine();
+		if (termOfService == null){
+			return null;
+		}else{
+			System.out.println("Server: " + termOfService);
+			return termOfService;
+		}
+	}
+
 }
