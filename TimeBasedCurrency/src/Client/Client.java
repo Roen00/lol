@@ -39,7 +39,7 @@ public class Client{
 		BufferedReader stdIn = new BufferedReader(new InputStreamReader(System.in));
 		
 		
-		//Sending name of clien
+		//Sending name of clie
 		while(true){
 			String line = clientInputStream.readLine();
 			if (line.startsWith("Podaj")){
