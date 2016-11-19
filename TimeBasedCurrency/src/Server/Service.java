@@ -1,11 +1,46 @@
 package Server;
 
-public class Service {
-	
+import java.io.Serializable;
+
+public class Service implements Serializable{
+	private static final long serialVersionUID = 1L;
 	private String nameOfService;
 	private String termOfService;
 	private int statusOfService;
 	
+	@Override
+	public int hashCode(){
+		return nameOfService.hashCode()+termOfService.hashCode();
+	}
+	
+	@Override
+	public boolean equals(Object o){
+		Service service = (Service)o;
+		if (this.nameOfService.equals(service.nameOfService)){
+			return true;
+		}
+		else {
+			return false;
+		}
+	}
+	
+	public Service(){
+		this.nameOfService = ServiceConstants.EMPTY;
+		this.termOfService = ServiceConstants.EMPTY;
+		this.statusOfService = ServiceConstants.NO_INFO;
+	}
+	
+	public Service(String nameOfService, String termOfService){
+		this.nameOfService = nameOfService;
+		this.termOfService = termOfService;
+		this.statusOfService = ServiceConstants.NEW_SERVICE;
+	}
+	
+	public Service(String nameOfService){
+		this.nameOfService = nameOfService;
+		this.termOfService = "";
+		this.statusOfService = ServiceConstants.NO_INFO;
+	}
 	
 	public void setNameOfService(String nameOfService){
 		this.nameOfService = nameOfService;
@@ -31,33 +66,21 @@ public class Service {
 		return this.statusOfService;
 	}
 	
-	public Service(){
-		this.nameOfService = ServiceConstants.EMPTY;
-		this.termOfService = ServiceConstants.EMPTY;
-		this.statusOfService = ServiceConstants.NO_INFO;
-	}
-	
-	public Service(String nameOfService, String termOfService){
-		this.nameOfService = nameOfService;
-		this.termOfService = termOfService;
-		this.statusOfService = ServiceConstants.NEW_SERVICE;
-	}
-	
 	public String print(){
 		if(statusOfService == 0){
-			return ("Service name: " + this.nameOfService + ", service term: " + this.termOfService + ", service status: no info.");
+			return ("Service name: " + this.nameOfService + ", service term: " + this.termOfService + ", service status: no info.\n");
 		}
 		else if(statusOfService == 1){
-			return ("Service name: " + this.nameOfService + ", service term: " + this.termOfService + ", service status: new service");
+			return ("Service name: " + this.nameOfService + ", service term: " + this.termOfService + ", service status: new service\n");
 		}
 		else if(statusOfService == 2){
-			return ("Service name: " + this.nameOfService + ", service term: " + this.termOfService + ", service status: reserved.");	
+			return ("Service name: " + this.nameOfService + ", service term: " + this.termOfService + ", service status: reserved.\n");	
 		}
 		else if(statusOfService == 3){
-			return ("Service name: " + this.nameOfService + ", service term: " + this.termOfService + ", service status: withdrawn.");	
+			return ("Service name: " + this.nameOfService + ", service term: " + this.termOfService + ", service status: withdrawn.\n");	
 		}
 		else {
-			return ("Service name: " + this.nameOfService + ", service term: " + this.termOfService + ", service status: !!!PROBLEM!!!");	
+			return ("Service name: " + this.nameOfService + ", service term: " + this.termOfService + ", service status: !!!PROBLEM!!!\n");	
 		}
 	}
 	
