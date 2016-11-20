@@ -5,8 +5,8 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
-import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 public class ServiceProtocol {
@@ -39,7 +39,6 @@ public class ServiceProtocol {
 			Service service = new Service(nameOfService, termOfService);
 			objectOutputStream.writeObject(service);
 			
-			
 			//Getting validation status from server
 			String line = (String)objectInputStream.readObject();
 
@@ -58,15 +57,23 @@ public class ServiceProtocol {
 		else if (decision == ServerConstants.WITHDRAW_YOUR_SERVICE){
 			objectOutputStream.writeObject("withdrawn");
 			System.out.println("Client wybral zamkniecie uslugi");
-			System.out.println("Twoje us³ugi: ");
+			
 			@SuppressWarnings("unchecked")
 			HashSet<Service> services = (HashSet<Service>)objectInputStream.readObject();
-			for (Service s : services) {
-		        System.out.print(s.print());
-		    }
-			System.out.println("Podaj nazwe zamykanej uslugi: ");
-			String nameOfClosingService = stdIn.readLine();
-			objectOutputStream.writeObject(nameOfClosingService);
+			
+			if (!services.isEmpty()){
+				System.out.println("Twoje us³ugi: ");
+				ServiceUtility.printHashSet(services);
+				
+				System.out.println("Podaj nazwe zamykanej uslugi: ");
+				String nameOfClosingService = stdIn.readLine();
+				objectOutputStream.writeObject(nameOfClosingService);
+			}
+			else {
+				System.out.println("Brak dostêpnych us³ug.");
+			}
+			
+			
 			
 			String line = (String)objectInputStream.readObject();
 			if (line.equals("error")){
@@ -80,22 +87,17 @@ public class ServiceProtocol {
 			else{
 				return true;
 			}
-		}
+		}	
 		else if (decision == ServerConstants.SHOW_ALL_SERVICES){
 			System.out.println("Client wybral wyswietlenie wszystkich uslug");
 			objectOutputStream.writeObject("show");
 			System.out.println("Dostêpne us³ugi: ");
 			
-			Map<String, HashSet<Service>> data = (HashMap<String, HashSet<Service>>)objectInputStream.readObject();
+			@SuppressWarnings("unchecked")
+			Map<String, HashSet<Service>> data = (LinkedHashMap<String, HashSet<Service>>)objectInputStream.readObject();
 			
 			if (!data.isEmpty()){
-				for (Map.Entry<String, HashSet<Service>> entry : data.entrySet()) {
-				    System.out.println(entry.getKey() + " : ");
-				    HashSet<Service> temp = entry.getValue();
-				    for (Service s : temp) {
-				        System.out.print(s.print());
-				    }
-				}
+				ServiceUtility.printHashMap(data);
 				
 				objectOutputStream.writeObject("ok");
 			}
@@ -115,8 +117,35 @@ public class ServiceProtocol {
 			}
 		}
 		else if (decision == ServerConstants.RESERVE_SERVICE){
+			objectOutputStream.writeObject("reserve");
 			System.out.println("Client wybral rezerwacje uslugi");
-			return false;
+			
+			@SuppressWarnings("unchecked")
+			Map<String, HashSet<Service>> data = (LinkedHashMap<String, HashSet<Service>>)objectInputStream.readObject();
+			
+			if (!data.isEmpty()){
+				System.out.println("Twoje us³ugi: ");
+				ServiceUtility.printHashMap(data);
+				System.out.println("Podaj nazwe rezerwowanej us³ugi: ");
+				String nameOfServiceToReserve = stdIn.readLine();
+				objectOutputStream.writeObject(nameOfServiceToReserve);
+			}
+			else {
+				System.out.println("Brak dostêpnych us³ug.");
+			}
+			
+			String line = (String)objectInputStream.readObject();
+			if (line.equals("error")){
+				System.out.println("Bledne dane");
+				return true;
+			}
+			else if (line.equals("accepted")){
+				System.out.println("Poprawne dane");
+				return false;
+			}
+			else{
+				return true;
+			}
 		}
 		else{
 			return true;
@@ -132,4 +161,10 @@ public class ServiceProtocol {
 					"3. Wyœwietl wszystkie dostêpne us³ugi. \n" +
 					"4. Zarezerwuj us³ugê.");
 	}
+	
+//	public void printHashSet(HashSet<Service> services){
+//		for (Service s : services) {
+//			System.out.print(s.print());
+//		}
+//	}
 }

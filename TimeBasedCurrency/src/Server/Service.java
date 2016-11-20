@@ -25,21 +25,21 @@ public class Service implements Serializable{
 	}
 	
 	public Service(){
-		this.nameOfService = ServiceConstants.EMPTY;
-		this.termOfService = ServiceConstants.EMPTY;
-		this.statusOfService = ServiceConstants.NO_INFO;
+		this.nameOfService = ServiceUtility.EMPTY;
+		this.termOfService = ServiceUtility.EMPTY;
+		this.statusOfService = ServiceUtility.NO_INFO;
 	}
 	
 	public Service(String nameOfService, String termOfService){
 		this.nameOfService = nameOfService;
 		this.termOfService = termOfService;
-		this.statusOfService = ServiceConstants.NEW_SERVICE;
+		this.statusOfService = ServiceUtility.NEW_SERVICE;
 	}
 	
 	public Service(String nameOfService){
 		this.nameOfService = nameOfService;
 		this.termOfService = "";
-		this.statusOfService = ServiceConstants.NO_INFO;
+		this.statusOfService = ServiceUtility.NO_INFO;
 	}
 	
 	public void setNameOfService(String nameOfService){
@@ -83,7 +83,4 @@ public class Service implements Serializable{
 			return ("Service name: " + this.nameOfService + ", service term: " + this.termOfService + ", service status: !!!PROBLEM!!!\n");	
 		}
 	}
-	
-	
-	
 }

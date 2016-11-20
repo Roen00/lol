@@ -84,14 +84,7 @@ public class Server {
 							synchronized(data){
 								if (!data.get(actualClient).contains(service)){
 									data.get(actualClient).add(service);
-					
-									for (Map.Entry<String, HashSet<Service>> entry : data.entrySet()) {
-									    System.out.println("\n" + entry.getKey() + " : ");
-									    HashSet<Service> temp = entry.getValue();
-									    for (Service s : temp) {
-									        System.out.print(s.print());
-									    }
-									}
+									ServiceUtility.printHashMap(data);
 									serverObjectOutputStream.writeObject("accepted");
 									break;
 								}
@@ -102,6 +95,7 @@ public class Server {
 						}
 					}
 					else if(inputLine.startsWith("withdrawn")) {
+						serverObjectOutputStream.reset();
 						serverObjectOutputStream.writeObject(data.get(actualClient));
 						String serviceToWithdraw;
 						while(true){
@@ -111,10 +105,8 @@ public class Server {
 							}
 							synchronized(data){
 								deleteFromHashSet(serviceToWithdraw);
-							    HashSet<Service> temp = data.get(actualClient);
-							    for (Service s : temp) {
-							        System.out.print(s.print());
-							    }
+								HashSet<Service> temp = data.get(actualClient);
+								ServiceUtility.printHashSet(temp);
 								
 								if (!data.get(actualClient).contains(serviceToWithdraw)){
 									serverObjectOutputStream.writeObject("accepted");
@@ -127,6 +119,7 @@ public class Server {
 						}
 					}
 					else if(inputLine.startsWith("show")) {
+						serverObjectOutputStream.reset();
 						serverObjectOutputStream.writeObject(data);
 						while(true){
 							if (((String)serverObjectInputStream.readObject()).equals("ok")){
@@ -139,7 +132,35 @@ public class Server {
 						}
 					}
 					else if(inputLine.startsWith("reserve")) {
+						Map<String, HashSet<Service>> tempData = new LinkedHashMap<String, HashSet<Service>>();
 						
+						for (Map.Entry<String, HashSet<Service>> entry : data.entrySet()) {
+							String key = entry.getKey();
+							if (!actualClient.equals(key)){
+								HashSet<Service> value = entry.getValue();
+								tempData.put(key, value);
+							}
+						}
+						
+						serverObjectOutputStream.reset();
+						serverObjectOutputStream.writeObject(tempData);
+						
+						String serviceToReserve;
+						while(true){
+							if ((serviceToReserve = (String)serverObjectInputStream.readObject()) == null){
+								serverObjectOutputStream.writeObject("error");
+								break;
+							}
+							synchronized(data){
+								if (reserveService(serviceToReserve)){
+									serverObjectOutputStream.writeObject("accepted");
+									break;
+								}
+								else {
+									serverObjectOutputStream.writeObject("error");
+								}
+							}
+						}
 					}
 					else {
 						
@@ -190,6 +211,24 @@ public class Server {
 					it.remove();
 				}
 			}
+		}
+		
+		private boolean reserveService(String serviceToReserve){
+			Service serviceToReserveExample = new Service(serviceToReserve);
+			
+			for (Map.Entry<String, HashSet<Service>> entry : data.entrySet()) {
+				//String key = entry.getKey();
+				HashSet<Service> value = entry.getValue();
+				Iterator<Service> it = value.iterator();
+				while(it.hasNext()){
+					Service tempService = it.next();
+					if(tempService.equals(serviceToReserveExample)){
+						tempService.setStatusOfService(ServiceUtility.RESERVED_SERVICE);
+						return true;
+					}
+				}
+			}
+			return false;
 		}
 		
 	}
